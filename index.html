@@ -1,0 +1,92 @@
+<script>
+  import Head from "next/head";
+import styled, { createGlobalStyle } from "styled-components";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { useSmoothCount } from "use-smooth-count";
+
+export default function Home({ userCount }: { userCount: number }) {
+    const [userId, setUserId] = useState<null | string>(null);
+    const [userError, setUserError] = useState<string>();
+    const [copyState, setCopyState] = useState("Copy");
+
+    const countRef = useRef<HTMLDivElement | null>(null);
+    const counter = useSmoothCount({ ref: countRef, target: userCount, duration: 3, curve: [0, 1, 0, 1] });
+
+    const copy = () => {
+        navigator.clipboard.writeText(
+            `[![Discord Presence](https://lanyard.cnrad.dev/api/${userId})](https://discord.com/users/${userId})`
+        );
+        setCopyState("Copied!");
+
+        setTimeout(() => setCopyState("Copy"), 1500);
+    };
+
+    useEffect(() => {
+        (async () => {
+            try {
+                await axios.get(`/api/${userId}`);
+                setUserError(undefined);
+            } catch (error: any) {
+                console.log(error.response);
+                if (error.response.status === 404 && error.response.data.code == "user_not_monitored")
+                    setUserError(`User not monitored by Lanyard, click to join the discord`);
+            }
+        })();
+    }, [userId]);
+
+    return (
+      </script> 
+      <GlobalStyle />
+            <Head>
+                <link rel="preconnect" href="https://fonts.gstatic.com" />
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400&display=swap"
+                    rel="stylesheet"
+                />
+                <title>Lanyard for GitHub Profile</title>
+                <meta property="og:title" content="Lanyard for GitHub Profile" key="title" />
+                <meta
+                    name="description"
+                    content="Utilize Lanyard to display your Discord Presence in your GitHub Profile"
+                />
+                <meta
+                    name="og:description"
+                    content="Utilize Lanyard to display your Discord Presence in your GitHub Profile"
+                />
+            </Head>
+            <Main>
+                <Container>
+                    <Title>lanyard profile readme 🏷️</Title>
+                    <Paragraph>Utilize Lanyard to display your Discord Presence in your GitHub Profile</Paragraph>
+                    <br />
+                    <Input onChange={el => setUserId(el.target.value)} placeholder="Enter your Discord ID" />
+                    {userId ? (
+                        <>
+                            <Output>
+                                [![Discord Presence](https://lanyard.cnrad.dev/api/{userId}
+                                )](https://discord.com/users/{userId})
+                            </Output>
+                            <ActionButton onClick={copy}>{copyState}</ActionButton>
+                            <a
+                                href="https://github.com/cnrad/lanyard-profile-readme#options"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                <ActionButton>Options</ActionButton>
+                            </a>
+                            <a
+                                style={{ textDecoration: "none" }}
+                                target="_blank"
+                                href={userError && "https://discord.gg/lanyard"}
+                                rel="noreferrer"
+                            >
+                                <Example
+                                    src={`/api/${userId}`}
+                                    alt={`${userError || "Please provide a valid user ID!"}`}
+                                    style={{ color: "#ff8787" }}
+                                />
+                            </a>
+                        </>
+                    ) : null}
+                </Container>
